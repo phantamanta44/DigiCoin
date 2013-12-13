@@ -1,0 +1,64 @@
+/*Player vaultPlayer = (Player) sender;
+        if (args.length < 1) {
+            get(sender, ((Player)sender).getName());
+        } else if (args[0].equals("pay")) {
+            if (args.length == 3) {
+                if (sender.hasPermission("digicoin.admin")) {
+                    double amount = parseDouble(args[2]);
+                    successMessage(sender, base.payPlayer(((Player)sender).getName(), args[1], amount));
+                } else {
+                    noPermMessage(sender);
+                }
+            } else {
+                usage(sender);
+            }
+        } else if (args[0].equals("get")) {
+            if (args.length == 2) {
+                if (sender.hasPermission("digicoin.admin")) {
+                    get(sender, args[1]);
+                } else {
+                    noPermMessage(sender);
+                }
+            } else {
+                usage(sender);
+            }
+        } else if (args[0].equals("set")) {
+            if (args.length == 3) {
+                double amount = parseDouble(args[2]);
+                successMessage(sender, base.setBalance(args[1], amount));
+            } else {
+                usage(sender);
+            }
+        } else if (args[0].equals("add") || args[0].equals("give")) {
+            if (args.length == 3) {
+                if (sender.hasPermission("digicoin.admin")) {
+                    double amount = parseDouble(args[2]);
+                    successMessage(sender, base.addBalance(args[1], amount));
+                } else {
+                    noPermMessage(sender);
+                }
+            } else {
+                usage(sender);
+            } 
+        } else if (args[0].equals("take")) {
+            if (args.length == 3) {
+                if (sender.hasPermission("digicoin.admin")) {
+                    double amount = parseDouble(args[2]);
+                    successMessage(sender, base.removeBalance(args[1], amount));
+                } else {
+                    noPermMessage(sender);
+                }
+            } else {
+                usage(sender);
+            }
+        } else if (args[0].equals("reload")) {
+            if (sender.hasPermission("digicoin.admin")) {
+                base.reloadPlugin();
+                sender.sendMessage(ChatColor.GREEN + "DigiCoin Reloaded!");
+            } else {
+                noPermMessage(sender);
+            }
+        } else {
+            usage(sender);
+        }
+        return true;*/
