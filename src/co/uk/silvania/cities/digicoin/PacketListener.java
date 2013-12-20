@@ -27,26 +27,30 @@ public class PacketListener implements PluginMessageListener {
 		String checkSide = "";
 		if (channel.equals("FCDigiCoinPkt")) {
 			DataInputStream dis = new DataInputStream(new ByteArrayInputStream(msg));
-			System.out.println("DigiCoin-side Packet get");
+			System.out.println("[DigiCoin] DigiCoin-side Packet get");
 			try {
 				checkSide = dis.readUTF();
 				value = dis.readDouble();
 				playerName = dis.readUTF();
 				if (checkSide.equals("digicoinDeposit")) {
-					System.out.println("DigiCoin-Side Deposit Packet Received: " + value);
+					System.out.println("[DigiCoin] DigiCoin-Side Deposit Packet Received: " + value);
 					digiCoin.addBalance(playerName, value);	
 				} else if (checkSide.equals("digicoinWithdraw")) {
-					System.out.println("DigiCoin-Side Withdraw Packet Received: " + value);
+					System.out.println("[DigiCoin] DigiCoin-Side Withdraw Packet Received: " + value);
 					double dcBalance = digiCoin.getBalance(playerName);
 					if (dcBalance >= value) {
 						digiCoin.removeBalance(playerName, value);
 						respondPacket(playerName, value);
 						
 					}
+				} else if (checkSide.equals("digicoinInstallCheck")) {
+					System.out.println("[DigiCoin] DigiCoin install check received! It's installed, obviously...");
+					System.out.println("[DigiCoin] Let's send a reply to confirm that!");
+					confirmCheckPacket();
 				}
 			}
 			catch (IOException e) {
-				System.out.println("Packet failed!");
+				System.out.println("[DigiCoin] Packet failed!");
 			}
 			finally {}
 		}		
@@ -56,13 +60,29 @@ public class PacketListener implements PluginMessageListener {
 		ByteArrayOutputStream b = new ByteArrayOutputStream();
 		DataOutputStream out = new DataOutputStream(b);
 		Player p = Bukkit.getOnlinePlayers()[0];
-		
+		System.out.println("[DigiCoin] Prepare to confirm the withdrawl amount; " + value + " for " + playerName);
 		try {
+			System.out.println("[DigiCoin] Off it goes!");
 			out.writeUTF("digicoinWithdrawConfirm");
 			out.writeDouble(value);
 			out.writeUTF(playerName);
 		} catch (IOException e) {
-			System.out.println("Packet Failed!");
+			System.out.println("[DigiCoin] Packet Failed!");
+		}
+		System.out.println("[DigiCoin] It should now have been sent");
+		p.sendPluginMessage(this.digiCoin, "FCDigiCoinPkt", b.toByteArray());
+	}
+	
+	public void confirmCheckPacket() {
+		ByteArrayOutputStream b = new ByteArrayOutputStream();
+		DataOutputStream out = new DataOutputStream(b);
+		Player p = Bukkit.getOnlinePlayers()[0];
+		System.out.println("[DigiCoin] Here goes the packet!");
+		try {
+			out.writeUTF("digicoinInstallConfirm");
+			out.writeBoolean(true);
+		} catch (IOException e) {
+			System.out.println("[DigiCoin] Packet Failed!");
 		}
 		p.sendPluginMessage(this.digiCoin, "FCDigiCoinPkt", b.toByteArray());
 	}

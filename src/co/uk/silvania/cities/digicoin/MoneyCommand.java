@@ -65,6 +65,32 @@ public class MoneyCommand implements CommandExecutor {
 					noPermsMessage(sender);
 				}
 				
+			} else if (args[0].equalsIgnoreCase("Forge")) {
+				if (sender.hasPermission("digicoin.pay")) {
+					if (args.length == 3) {
+						if (sender instanceof Player) {
+							double amount = parseDouble(args[2]);
+							if (digiCoin.payPlayer(((Player)sender).getName(), args[1], amount).equals(true)) {
+								Player player = (Player) sender;
+								Player receiver = player.getServer().getPlayer(args[1]);
+								
+								sender.sendMessage(dgreen + "You have deposited " + gold + args[2] + dgreen + " to your Forge balance!");
+							} else {
+								double balance = digiCoin.getBalance(sender.getName());
+								double x = amount - balance;
+								sender.sendMessage(red + "You do not have enough funds! You need " + gold + x + red + " more.");
+							}
+						} else {
+							sender.sendMessage(red + "Only in-game players can pay one another!");
+							
+						}
+					} else {
+						sender.sendMessage(gold + "/DigiCoin Pay <Player> <Amount>" + dgreen + " - Pay the player the amount.");
+					}
+				} else {
+					noPermsMessage(sender);
+				}
+				
 			} else if (args[0].equalsIgnoreCase("Get") || (args[0].equalsIgnoreCase("Balance"))) {
 				if (sender.hasPermission("digicoin.balance")) {
 					if (args.length == 2) {
