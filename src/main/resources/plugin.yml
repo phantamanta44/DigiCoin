@@ -1,20 +1,18 @@
 name: DigiCoin
 author: Flenix
 main: co.uk.silvania.cities.digicoin.DigiCoin
-version: 0.1
+version: ${project.version}
 depend: [Vault]
 
 commands:
-  digicoin:
-    aliases: [ econ, wallet, money ]
-    description: Balance command
+  money:
+    description: Economy core command.
 
 permissions:
   digicoin.pay:
     description: Lets you pay a player.
+  digicoin.top:
+    description: Lets you display the leaderboard.
   digicoin.admin:
     description: Lets you use admin commands.
-    default: op
-  digicoin.balance:
-    description: Lets you see anyones balance.
     default: op
