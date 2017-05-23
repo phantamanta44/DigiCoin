@@ -1,17 +1,17 @@
 package co.uk.silvania.cities.digicoin;
 
+import com.google.common.base.Supplier;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 public class DigiCoin extends JavaPlugin {
 	
-	private static final Logger log = Logger.getLogger("Minecraft");
+	private static final Logger log = Logger.getLogger("DigiCoin");
 
 	private double defaultBalance = 0.0;
 	private final ReentrantLock lockPlugin = new ReentrantLock();
@@ -23,10 +23,12 @@ public class DigiCoin extends JavaPlugin {
 	}
 	
 	public void reloadPlugin() {
-		withLock(() -> {
-			reloadConfig();
-			defaultBalance = getConfig().getDouble("config.default_balance", 0.0);
-			return null;
+		withLock(new Runnable() {
+			@Override
+			public void run() {
+				reloadConfig();
+				defaultBalance = getConfig().getDouble("config.default_balance", 0.0);
+			}
 		});
 	}
 	
@@ -34,15 +36,18 @@ public class DigiCoin extends JavaPlugin {
 		return getBalance(Bukkit.getServer().getOfflinePlayer(Player));
 	}
 
-	public double getBalance(OfflinePlayer player) {
-		return withLock(() -> {
-			ConfigurationSection bals = balances();
-			String id = player.getUniqueId().toString();
-			if (!bals.contains(id)) {
-				bals.set(id, defaultBalance);
-				return defaultBalance;
-			} else {
-				return bals.getDouble(id);
+	public double getBalance(final OfflinePlayer player) {
+		return withLock(new Supplier<Double>() {
+			@Override
+			public Double get() {
+				ConfigurationSection bals = balances();
+				String id = player.getUniqueId().toString();
+				if (!bals.contains(id)) {
+					bals.set(id, defaultBalance);
+					return defaultBalance;
+				} else {
+					return bals.getDouble(id);
+				}
 			}
 		});
 	}
@@ -51,10 +56,16 @@ public class DigiCoin extends JavaPlugin {
 		return setBalance(Bukkit.getServer().getOfflinePlayer(Player), NewBalance);
 	}
 
-	public boolean setBalance(OfflinePlayer player, double balance) {
+	public boolean setBalance(final OfflinePlayer player, final double balance) {
 		if (balance < 0)
 			return false;
-		withLock(() -> balances().set(player.getUniqueId().toString(), balance));
+		withLock(new Runnable() {
+			@Override
+			public void run() {
+				DigiCoin.this.balances().set(player.getUniqueId().toString(), balance);
+				saveConfig();
+			}
+		});
 		return true;
 	}
 	

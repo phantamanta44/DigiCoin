@@ -9,20 +9,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.*;
 
 public class MoneyCommand implements CommandExecutor {
 
-	private static final String[] HELP_TEXT = {
-			ChatColor.RED + "Invalid command usage!",
-			ChatColor.RED + "/money balance [player]",
-			ChatColor.RED + "/money pay <player> <amount>",
-			ChatColor.RED + "/money top"
-	};
 	private final DigiCoin digiCoin;
 	
 	public MoneyCommand(DigiCoin digiCoin) {
@@ -50,23 +40,31 @@ public class MoneyCommand implements CommandExecutor {
 						}
 						target = (Player)sender;
 					}
-					sender.sendMessage(
+					sender.sendMessage(ChatColor.GOLD + "Player " +
 							ChatColor.GRAY + target.getName() +
-									ChatColor.GOLD + " has "
-									+ ChatColor.GRAY + format(digiCoin.getBalance(target)));
+							ChatColor.GOLD + " has a balance of "
+							+ ChatColor.GRAY + format(digiCoin.getBalance(target))
+							+ ChatColor.GOLD + ".");
 					break;
 				case "top":
 					if (sender.hasPermission("digicoin.top")) {
-						ConfigurationSection bals = digiCoin.balances();
-						List<String> top = bals.getKeys(false).stream()
-								.sorted(Comparator.<String>comparingDouble(bals::getDouble).reversed())
-								.limit(10)
-								.collect(Collectors.toList());
-						sender.sendMessage(IntStream.range(0, top.size() - 1)
-								.mapToObj(i -> formatBaltop(i,
-										Bukkit.getServer().getOfflinePlayer(UUID.fromString(top.get(i))).getName(),
-										bals.getDouble(top.get(i))))
-								.toArray(String[]::new));
+						final ConfigurationSection bals = digiCoin.balances();
+						List<String> top = new ArrayList<>(bals.getKeys(false));
+						Collections.sort(top, new Comparator<String>() {
+							@Override
+							public int compare(String a, String b) {
+								return (int)Math.signum(bals.getDouble(b) - bals.getDouble(a));
+							}
+						});
+						int limit = Math.min(10, top.size());
+						String[] msg = new String[top.size() + 1];
+						msg[0] = ChatColor.GOLD + "== Leaderboard ==";
+						for (int i = 0; i < limit; i++) {
+							msg[i + 1] = formatBaltop(i,
+									Bukkit.getServer().getOfflinePlayer(UUID.fromString(top.get(i))).getName(),
+									bals.getDouble(top.get(i)));
+						}
+						sender.sendMessage(msg);
 					} else {
 						noPerms(sender);
 					}
@@ -222,7 +220,7 @@ public class MoneyCommand implements CommandExecutor {
 	}
 
 	private String formatBaltop(int place, String name, double balance) {
-		return ChatColor.GOLD + Integer.toString(place) + ": " +
+		return ChatColor.GOLD + Integer.toString(place + 1) + ": " +
 				ChatColor.WHITE + name + ChatColor.DARK_GRAY + " | " +
 				ChatColor.GRAY + format(balance);
 	}
@@ -232,7 +230,12 @@ public class MoneyCommand implements CommandExecutor {
 	}
 
 	private void help(CommandSender sender) {
-		sender.sendMessage(HELP_TEXT);
+		sender.sendMessage(new String[] {
+				ChatColor.RED + "Invalid command usage!",
+				ChatColor.RED + "/money balance [player]",
+				ChatColor.RED + "/money pay <player> <amount>",
+				ChatColor.RED + "/money top"
+		});
 	}
 
 }
