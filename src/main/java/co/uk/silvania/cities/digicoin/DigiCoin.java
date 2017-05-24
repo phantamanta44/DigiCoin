@@ -20,6 +20,8 @@ public class DigiCoin extends JavaPlugin {
 	public void onEnable() {
 		this.getCommand("money").setExecutor(new MoneyCommand(this));
 		log.info(String.format("%s %s has been successfully enabled!", getDescription().getName(), getDescription().getVersion()));
+		saveDefaultConfig();
+		defaultBalance = getConfig().getDouble("config.default_balance", 0.0);
 	}
 	
 	public void reloadPlugin() {
